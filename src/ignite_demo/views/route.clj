@@ -4,7 +4,8 @@
         korma.core
         korma.db)
   (:require [ignite-demo.models.route :as r]
-            [ignite-demo.models.direction :as d]))
+            [ignite-demo.models.direction :as d]
+            [ignite-demo.views.layout :as layout]))
 
 (declare display-direction
          path-params-for-stops
@@ -16,21 +17,16 @@
   (let [route (r/route-for-tag route-tag)
         {:keys [title latmax latmin lonmax lonmin]} route
         directions (r/directions-for-route route-tag)]
-    (html5
-     [:head
-      (include-css "/stylesheets/base.css")]
-     [:body 
-      [:div {:id "wrapper"}
-       [:h3 route-tag]
-       title
-       [:div
-        [:table {:border 1 :cellpadding 5}
-         [:tr [:th] [:th "max"] [:th "min"]]
-         [:tr [:th "lat"] [:td latmax] [:td latmin]]
-         [:tr [:th "lon"] [:td lonmax] [:td lonmin]]]]
-       [:div
-        (map display-direction directions)]
-       [:a {:href "/"} "home"]]])))
+    (layout/page title
+     [:h3 title]
+     [:div
+      [:table {:border 1 :cellpadding 5}
+       [:tr [:th] [:th "max"] [:th "min"]]
+       [:tr [:th "lat"] [:td latmax] [:td latmin]]
+       [:tr [:th "lon"] [:td lonmax] [:td lonmin]]]]
+     [:div
+      (map display-direction directions)]
+     [:a {:href "/"} "home"])))
 
 (defn display-direction
   "Helper method that displays a list of stops for a given direction."

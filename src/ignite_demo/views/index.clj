@@ -2,27 +2,22 @@
   "View for the index page."
   (:use [hiccup.page :only (html5 include-css)]
         korma.db
-        korma.core
-        ignite-demo.models.db))
-
-(defentity muni-routes
-  (table :route :muni-routes))
+        korma.core)
+  (:require [ignite-demo.models.db :as db]
+            [ignite-demo.views.layout :as layout]))
 
 (def routes-list
-  (select muni-routes
+  (select db/route
           (fields :id :title)))
 
 (defn display
   "Generates the HTML for the index page."
   []
-  (html5 [:head
-          (include-css "/stylesheets/base.css")]
-         [:body
-          [:div {:id "wrapper"}
-           [:h3 "ROUTES"]
-           [:ul
-            (map #(vector
-                   :li
-                   [:a {:href (str "route/" (:id %))}
-                    (:title %)])
-                 routes-list)]]]))
+  (layout/page "Routes List"
+   [:h3 "ROUTES"]
+   [:ul
+    (map #(vector
+           :li
+           [:a {:href (str "route/" (:id %))}
+            (:title %)])
+         routes-list)]))
