@@ -10,7 +10,8 @@
   :plugins [[lein-ring "0.8.2"]
             [codox "0.6.4"]]
   :codox {:src-dir-uri "http://github.com/cammsaul/mozilla-ignite-demo/blob/master"
-          :src-linenum-anchor-prefix "L"}
+          :src-linenum-anchor-prefix "L"
+          :output-dir "../mozilla_ignite_doc"}
   :ring {:handler ignite-demo.handler/app}
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.3"]]}}
