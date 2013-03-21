@@ -15,13 +15,17 @@ You will need Postgres installed.
 To start a web server for the application, run:
 
 	lein ring server
-	
+
 You must set the URL for your postgres database in the enviromnent variable DATABASE_URL.
 e.g 
+
 	DATABASE_URL=postgresql://username:password@host:port/db_name
 	
 ## Documentation
 
+[API Docs][1]
+
+[1]: http://cammsaul.github.com/mozilla-ignite-demo
 
 ## License
 
