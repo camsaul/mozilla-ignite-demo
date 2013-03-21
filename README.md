@@ -2,6 +2,12 @@
 
 A web application written in Clojure to help the SFMTA determine where various Muni routes slow down, where additional buses are needed, etc.
 
+## Live Demo
+
+A live demo is intermittently avaiable on the [LuckyBird test server][1].
+
+[1]: http://birdapi.net
+
 ## Prerequisites
 
 You will need [Leiningen][1] 2.0 or above installed.
