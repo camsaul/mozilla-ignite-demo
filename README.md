@@ -10,11 +10,11 @@ A live demo is intermittently avaiable on the [LuckyBird test server][1].
 
 ## Prerequisites
 
-You will need [Leiningen][1] 2.0 or above installed.
+You will need [Leiningen][2] 2.0 or above installed.
 
 You will need Postgres installed.
 
-[1]: https://github.com/technomancy/leiningen
+[2]: https://github.com/technomancy/leiningen
 
 ## Running
 
@@ -31,9 +31,9 @@ You must also set a Google Static Maps API Key in the environment variable GOOGL
 	
 ## Documentation
 
-[API Docs][1]
+[API Docs][3]
 
-[1]: http://cammsaul.github.com/mozilla-ignite-demo
+[3]: http://cammsaul.github.com/mozilla-ignite-demo
 
 ## License
 
