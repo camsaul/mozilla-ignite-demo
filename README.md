@@ -20,6 +20,8 @@ You must set the URL for your postgres database in the enviromnent variable DATA
 e.g 
 
 	DATABASE_URL=postgresql://username:password@host:port/db_name
+
+You must also set a Google Static Maps API Key in the environment variable GOOGLE_MAPS_API_KEY.
 	
 ## Documentation
 

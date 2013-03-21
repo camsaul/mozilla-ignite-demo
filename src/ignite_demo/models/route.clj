@@ -3,6 +3,11 @@
         korma.core)
   (:require [ignite-demo.models.db :as db]))
 
+(defn all
+  "Returns a seq of all routes."
+  []
+  (select db/route))
+
 (defn route-for-tag
   "Returns the route for the route-tag"
   [route-tag]
