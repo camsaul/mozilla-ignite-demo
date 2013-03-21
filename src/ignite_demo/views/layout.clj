@@ -3,7 +3,7 @@
   (:use [hiccup.page :only (html5 include-css)]))
 
 (defn page
-  "Takes a page title and hiccup HMTL elements and creates a"
+  "Takes a page title and hiccup HMTL elements and wraps it with common stylesheet references etc."
   [title & body]
   (html5
    [:head
