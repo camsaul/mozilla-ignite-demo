@@ -1,6 +1,6 @@
 # LuckyBird's Mozilla Ignite Demo
 
-A web application written in Clojure to help the SFMTA determine where various Muni routes slow down, where additional buses are needed, etc.
+A web application written in Clojure and ClojureScript to help the SFMTA determine where various Muni routes slow down, where additional buses are needed, etc.
 
 ## Live Demo
 
