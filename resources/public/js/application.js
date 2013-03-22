@@ -21255,5 +21255,5 @@ $(document).ready(function() {
     return $(this$).toggleClass("todo-done")
   });
   $("[data-toggle=tooltip]").tooltip();
-  return $("[data-toggle=popover]").popover()
+  return $("[data-toggle=popoverz]").popover()
 });

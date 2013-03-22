@@ -27,7 +27,6 @@
                 "/js/jquery.tagsinput.js"
                 "/js/bootstrap-tooltip.js"
                 "/js/jquery.placeholder.js"
-                "http://vjs.zencdn.net/c/video.js"
                 "/js/application.js")]))
 
 (defn header

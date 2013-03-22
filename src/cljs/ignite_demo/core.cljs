@@ -7,4 +7,5 @@
                   (fn []
                     (.toggleClass (js/$ js/this) "todo-done")))
           (.tooltip (js/$ "[data-toggle=tooltip]"))
-          (.popover (js/$ "[data-toggle=popover]"))))
+          (.popover (js/$ "[data-toggle=popoverz]"))))
+
