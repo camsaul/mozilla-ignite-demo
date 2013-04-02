@@ -57,8 +57,12 @@
       (doall results))))
 
 (defn passenger-counts-for-stop
-  "Returns a seq of maps of passenger counts for a given stop. "
+  "Returns a seq of maps of passenger counts for a given stop. Keys aer :route_id, :est_load, :time_stop, and :hour"
   [stop-tag]
-  (select db/passenger_count          
-          (where {:stop_id stop-tag})
-          (fields :route_id, :est_load, :getting_on, :getting_off, :time_stop)))
+  (db/with-conn
+    (sql/with-query-results results
+      [(str "select route_id, est_load, "
+            "cast(extract(hour from time_stop) as integer) as hour "
+            "from passenger_count "
+            "where stop_id = '" stop-tag "';")]
+      (doall results))))
