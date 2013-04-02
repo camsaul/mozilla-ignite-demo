@@ -27,6 +27,7 @@
                 "/js/jquery.tagsinput.js"
                 "/js/bootstrap-tooltip.js"
                 "/js/jquery.placeholder.js"
+                "/js/Chart.js"
                 "/js/application.js")]))
 
 (defn header

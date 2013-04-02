@@ -11,7 +11,7 @@
             [ignite-demo.views.layout :as layout]
             [clojure.math.numeric-tower :as math]))
 
-(declare display-time-tables display-passenger-counts)
+(declare display-time-tables display-passenger-counts display-passenger-counts-graph)
 
 (defn display
   "Generates the HTML for a given stop-tag."
@@ -66,28 +66,33 @@
 
 (defn display-passenger-counts-graph
   "Generates an HTML 5 graph to show the passenger counts for a stop"
-  [stop-tag])
+  [route-tag route-maps]
+  (let [width (quot 390 (count route-maps))
+        x-offsets (iterate (partial + width) 0)
+        h-multiplier (quot 380 (apply max (map :est_load route-maps)))]
+    [:div.route-table {:route route-tag}
+     [:b (str "Route " route-tag)]
+     `[:svg {:xmlns "http://www.w3.org/2000/svg"
+             :preserveAspectRatio "xMinYMin meet"
+             :width 400 :height 400 :viewBox "0 0 400 400"}
+       ~@(mapv (fn [m x-offset]
+                 (let [[r g b] (repeatedly #(int (rand 255)))
+                       height (* (:est_load m) h-multiplier)]
+                   [:g
+                    [:rect {:x x-offset :y (- 400 height) :width width :height height
+                            :style (format "fill:rgb(%d,%d,%d);stroke-width:0;" r g b)} ""]
+                    [:text {:x (+ x-offset (/ width 2) -8) :y (- 395 height)} (:est_load m)]]))
+               route-maps x-offsets)]]))
 
 (defn display-passenger-counts
   "Generates the HTML for show the passenger counts table for a stop."
   [stop-tag]
-  (let [sdf (java.text.SimpleDateFormat. "E KK:mm a")
-        all-maps (group-by :route_id
+  (let [all-maps (group-by :route_id
                            (map #(update-in % [:route_id] r/regular-route-tag-for-passenger-count-route-tag)
                                 (s/passenger-counts-for-stop stop-tag)))
         route-ids (map first all-maps)]
-    `[:div {:id :passenger-count}
-      [:div {:class :btn-group}
-       ~@(map #(vector :button {:class :btn :route %} %) route-ids)]
-      ~@(map (fn [[route-tag count-maps]]
-               [:div {:class :route-table :route route-tag}
-                [:b (str "Route " route-tag)]
-                `[:table
-                  [:tr ~@(map #(vector :th %) ["Time" "Getting On" "Getting Off" "Est. Passengers"])]
-                  ~@(map (fn [count-map]
-                           (let [{:keys [getting_on getting_off est_load time_stop]} count-map
-                                 formatted-time (.format sdf time_stop)]
-                             `[:tr
-                               ~@(map #(vector :td %) [formatted-time getting_on getting_off est_load])]))
-                         (sort-by :time_stop count-maps))]])
-             all-maps)]))
+    `[:div#passenger-count
+      [:div.btn-group ~@(map #(vector :button.btn {:route %} %) route-ids)]
+      ~@(mapv  (fn [[tag m]]
+                 (display-passenger-counts-graph tag (take 20 (sort-by :route_id m))))
+               all-maps)]))
