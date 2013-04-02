@@ -19,7 +19,8 @@
                         :compiler {:output-to "resources/public/js/application.js"
                                    :optimizations :whitespace
                                    :pretty-print true}}]}
-  :codox {:src-dir-uri "http://github.com/cammsaul/mozilla-ignite-demo/blob/master"
+  :codox {:sources ["src/clj" "src/cljs"]
+          :src-dir-uri "http://github.com/cammsaul/mozilla-ignite-demo/blob/master/"
           :src-linenum-anchor-prefix "L"}
   :ring {:handler ignite-demo.handler/app}
   :profiles
