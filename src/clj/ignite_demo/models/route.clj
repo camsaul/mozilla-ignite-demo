@@ -37,23 +37,18 @@
                        (all-stops-for-route route-tag))]
         (second (reduce (fn [s1 s2] (if (< (first s1) (first s2)) s1 s2)) stops))))))
 
-; 5xx = xx limited (L) route
-; 6xx = owl route
-; 7xx = xx express route
-; 8xx = xx bx express route
-; 9xx = xx ax express route
-
+;;; 5xx = xx limited (L) route
+;;; 6xx = xx owl route
+;;; 7xx = xx express route
+;;; 8xx = xx bx express route
+;;; 9xx = xx ax express route
 (defn regular-route-tag-for-passenger-count-route-tag
   "The passenger count CSV data provided by the SFMATA uses different route numbers than what the routes are actually called. This function translates the names used in passenger-count to what we use everywhere else."
   [route-tag]
   (let [route-tag-as-int (try (Integer/parseInt route-tag) (catch NumberFormatException e))]
     (if (or (nil? route-tag-as-int) (< route-tag-as-int 500))
       route-tag
-      (let [hundreds (quot route-tag-as-int 100)
-            rest (rem route-tag-as-int 100)]
-        (condp = hundreds
-            5 (str rest "L")
-            6 (str rest " OWL")
-            7 (str rest "X")
-            8 (str rest "BX")
-            9 (str rest "AX"))))))
+      (let [suffixes {5 "L", 6 " OWL", 7 "X", 8 "BX", 9 "AX" }
+            hundreds (quot route-tag-as-int 100)
+            prefix (rem route-tag-as-int 100)]
+        (str prefix (suffixes hundreds))))))

@@ -64,17 +64,30 @@
                                                  (format "%d:%02d %s" mins-late secs-late late-str)])]))
                arrival-times)])))
 
+(defn display-passenger-counts-graph
+  "Generates an HTML 5 graph to show the passenger counts for a stop"
+  [stop-tag])
+
 (defn display-passenger-counts
   "Generates the HTML for show the passenger counts table for a stop."
   [stop-tag]
-  (let [sdf (java.text.SimpleDateFormat. "KK:mm a")
-        count-maps (sort-by :time_stop (s/passenger-counts-for-stop stop-tag))]
-    `[:table {:style "margin-top: 10px;" :border 1 :cellpadding 10}
-      [:tr ~@(map #(vector :th %) ["Route" "Time" "Getting On" "Getting Off" "Est. Passengers"])]
-      ~@(map (fn [count-map]
-               (let [{:keys [route_id getting_on getting_off est_load time_stop]} count-map
-                     regular-route-tag (r/regular-route-tag-for-passenger-count-route-tag route_id)
-                     formatted-time (.format sdf time_stop)]
-                 `[:tr
-                   ~@(map #(vector :td %) [regular-route-tag formatted-time getting_on getting_off est_load])]))
-             count-maps)]))
+  (let [sdf (java.text.SimpleDateFormat. "E KK:mm a")
+        all-maps (group-by :route_id
+                           (map #(update-in % [:route_id] r/regular-route-tag-for-passenger-count-route-tag)
+                                (s/passenger-counts-for-stop stop-tag)))
+        route-ids (map first all-maps)]
+    `[:div {:id :passenger-count}
+      [:div {:class :btn-group}
+       ~@(map #(vector :button {:class :btn :route %} %) route-ids)]
+      ~@(map (fn [[route-tag count-maps]]
+               [:div {:class :route-table :route route-tag}
+                [:b (str "Route " route-tag)]
+                `[:table
+                  [:tr ~@(map #(vector :th %) ["Time" "Getting On" "Getting Off" "Est. Passengers"])]
+                  ~@(map (fn [count-map]
+                           (let [{:keys [getting_on getting_off est_load time_stop]} count-map
+                                 formatted-time (.format sdf time_stop)]
+                             `[:tr
+                               ~@(map #(vector :td %) [formatted-time getting_on getting_off est_load])]))
+                         (sort-by :time_stop count-maps))]])
+             all-maps)]))

@@ -1,4 +1,18 @@
 footer {
     margin-top: 20px;
 }
-    
+
+div#passenger-count div {
+    margin-top: 10px;
+}
+
+div#passenger-count table {
+    margin-top: 10px;
+    border-spacing: 1px;
+    border: 1px solid #000000;
+}
+
+div#passenger-count table tr * {
+    padding: 10px;
+    border: 1px solid #000000;
+}    
