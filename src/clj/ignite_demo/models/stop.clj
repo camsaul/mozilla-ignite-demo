@@ -2,6 +2,7 @@
   (:use korma.db
         korma.core)
   (:require [ignite-demo.models.utility :as util]
+            [clojure.java.jdbc :as sql]
             [ignite-demo.models.db :as db]))
 
 (def all-stops (select db/stop))
@@ -34,3 +35,30 @@
         route-tags (map :route_id directions)]
     (select db/route
             (where (apply or (map #(assoc {} :id %) route-tags))))))
+
+(defn arrival-times-for-stop
+  "Returns a seq of maps keyed by :route_id, :scheduled_arrival and :real_arrival for a given stop"
+  [stop-tag]
+  (db/with-conn
+    (sql/with-query-results results
+      [(str "select sa.route_id, sa.arrival_time, "
+            "cast (extract(seconds from (sa.arrival_time - ra.arrival_time)) as integer) as diff "
+            "from scheduled_arrival as sa "
+            "left join realtime_arrival as ra "
+            "on sa.block_id = ra.block_id "
+            "and sa.route_id = ra.route_id "
+            "and sa.trip_id = ra.trip_id "
+            "and sa.stop_id = ra.stop_id "
+            "where sa.stop_id = '" stop-tag "' "
+            "and sa.arrival_time is not null "
+            "and ra.arrival_time is not null "
+            "and extract(day from sa.arrival_time) = extract(day from ra.arrival_time) "
+            "order by route_id, arrival_time asc;")]
+      (doall results))))
+
+(defn passenger-counts-for-stop
+  "Returns a seq of maps of passenger counts for a given stop. "
+  [stop-tag]
+  (select db/passenger_count          
+          (where {:stop_id stop-tag})
+          (fields :route_id, :est_load, :getting_on, :getting_off, :time_stop)))

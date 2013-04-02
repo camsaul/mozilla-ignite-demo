@@ -1,4 +1,6 @@
-(ns ignite-demo.models.utility)
+(ns ignite-demo.models.utility
+  (:require [clojure-csv.core :as csv]
+            [clojure.java.io :as io]))
 
 (defn distance-between-coordinates
   "Returns the distance in meters between two locations specified by their lats and lons."
@@ -16,3 +18,24 @@
         c (* 2 (Math/atan2 (Math/sqrt a) (Math/sqrt (- 1 a))))
         d (* RADIUS c)]
     d))
+
+(def csv-line-num (atom 0))
+(defmacro do-lines-in-csv-file
+  "Parses every line in a csv file in parallel and creates a map keyed by the values of each line. /
+Successively binds each line to line-binding and executes body via dorun (presumably for side effects). /
+Returns nil. Additional bindings (evaluated after each line is bound) may also be specified. "
+  [[line-binding path-to-csv-file & other-bindings] & body]
+  (reset! csv-line-num 0)
+  `(with-open [reader# (io/reader ~path-to-csv-file)]
+     (let [lines# (line-seq reader#)
+           [keys#] (csv/parse-csv (first lines#))
+           parsed-lines# (pmap #(zipmap keys# (first (csv/parse-csv %)))(rest lines#))]
+       (dorun
+        (pmap (fn [~line-binding]
+                (swap! csv-line-num inc)
+                (let [line-num# @csv-line-num]
+                  (if (= 0 (rem line-num# 500))
+                    (println "CSV line num: " @csv-line-num)))
+                (let [~@other-bindings]
+                  ~@body))
+              parsed-lines#)))))
