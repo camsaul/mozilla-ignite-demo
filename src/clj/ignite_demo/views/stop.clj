@@ -49,7 +49,7 @@
        (display-passenger-counts stop-tag)]])))
 
 (defn display-time-tables
-  "..."
+  "Generates the HTML for the scheduled/actual arrivals table for a stop."
   [stop-tag]
   (let [sdf (java.text.SimpleDateFormat. "E dd/MM KK:mm a")]
     (map (fn [time]
@@ -63,7 +63,7 @@
          (s/arrival-times-for-stop stop-tag))))
 
 (defn display-passenger-counts
-  "..."
+  "Generates the HTML for show the passenger counts table for a stop."
   [stop-tag]
   (let [sdf (java.text.SimpleDateFormat. "KK:mm a")
         count-maps (sort-by :time_stop (s/passenger-counts-for-stop stop-tag))]
