@@ -64,12 +64,12 @@
 (defn display-arrivals-graph
   "Helper method to display a graph of average late/early times for a direction"
   [route-tag stops]
-  (let [arrival-times (r/arrival-times-for-route route-tag)
-        pairs (->> (mapv (fn [{:keys [id title]}]
-                           (if-let [arrival (arrival-times id)]
-                             [(format "%s: %s" title (util/format-late-early-string arrival))
-                              (math/abs arrival)]))
-                         stops)
-                   (filter #(not (nil? %))))]
-    (if (not (empty? pairs))
-      [:div.span6 (graph/display-vertical-bar-graph "Average Arrival Times Per Stop" pairs 500 20)])))
+  (if-let [arrival-times (r/arrival-times-for-route route-tag)]
+    (let [pairs (->> (mapv (fn [{:keys [id title]}]
+                             (if-let [arrival (arrival-times id)]
+                               [(format "%s: %s" title (util/format-late-early-string arrival))
+                                (math/abs arrival)]))
+                           stops)
+                     (filter #(not (nil? %))))]
+      (if (not (empty? pairs))
+        [:div.span6 (graph/display-vertical-bar-graph "Average Arrival Times Per Stop" pairs 500 20)]))))
