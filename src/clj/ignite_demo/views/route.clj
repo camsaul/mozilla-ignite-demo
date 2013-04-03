@@ -6,11 +6,13 @@
         korma.db
         ignite-demo.views.map-images)
   (:require [ignite-demo.models.route :as r]
+            [ignite-demo.models.utility :as util]
             [ignite-demo.models.direction :as d]
             [ignite-demo.views.layout :as layout]
-            [ignite-demo.views.graph :as graph]))
+            [ignite-demo.views.graph :as graph]
+            [clojure.math.numeric-tower :as math]))
 
-(declare display-direction display-pcount-graph)
+(declare display-direction display-pcount-graph display-arrivals-graph)
 
 (defn display
   "Creates the HTML for a given route-tag."
@@ -42,6 +44,7 @@
       (map-image-for-stops 300 stops)
       (if pcount-graph stops-list)]
      pcount-graph
+     (display-arrivals-graph route-tag stops)
      (if (not pcount-graph) [:div.span4 stops-list])]))
 
 (defn display-pcount-graph
@@ -57,3 +60,18 @@
                                     [(format "%s: %.1f" title pcount) pcount]))
                                 stops))]
         [:div.span6 (graph/display-vertical-bar-graph "Average Passenger Counts Per Stop" pairs  460 20)]))))
+
+(defn display-arrivals-graph
+  "Helper method to display a graph of average late/early times for a direction"
+  [route-tag stops]
+  (let [arrival-times (r/arrival-times-for-route route-tag)
+        stops (doall (group-by :id stops))
+        pairs (->> (mapv (fn [id]
+                           (if-let [stop-title (:title (first (stops id)))]
+                             (let [arrival (arrival-times id)]
+                               [(format "%s: %s" stop-title (util/format-late-early-string arrival))
+                                (math/abs arrival)])))
+                         (keys arrival-times))
+                   (filter #(not (nil? %))))]
+    (if (not (empty? pairs))
+      [:div.span6 (graph/display-vertical-bar-graph "Average Arrival Times Per Stop" pairs 500 20)])))

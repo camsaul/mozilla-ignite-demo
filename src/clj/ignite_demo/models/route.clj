@@ -79,3 +79,28 @@
       (mapv (fn [[stop-id s-map]]
               [stop-id (float (/ (apply + (map :est_load s-map)) (count s-map)))])
             (group-by :stop_id results)))))
+
+(defn arrival-times-for-route
+  "Returns a map of stop-id (str) -> avg-arrival-time-diff (in seconds) for a given route."
+  [route-tag]
+  (db/with-conn
+    (sql/with-query-results results
+      [(str "select stop_id, avg(diff) "
+            "from "
+            "(select sa.stop_id, "
+            "cast (extract(seconds from (sa.arrival_time - ra.arrival_time)) as integer) as diff  "
+            "from scheduled_arrival as sa  "
+            "left join realtime_arrival as ra  "
+            "on sa.block_id = ra.block_id  "
+            "and sa.route_id = ra.route_id  "
+            "and sa.trip_id = ra.trip_id  "
+            "and sa.stop_id = ra.stop_id  "
+            "where sa.route_id = '" route-tag "' "
+            "and sa.arrival_time is not null  "
+            "and ra.arrival_time is not null  "
+            "and extract(day from sa.arrival_time) = extract(day from ra.arrival_time)) as sub "
+            "group by stop_id; ")]
+      (if results
+        (apply assoc {} (flatten (map (fn [{:keys [stop_id avg]}]
+                                        [stop_id (float avg)])
+                                      (doall results))))))))

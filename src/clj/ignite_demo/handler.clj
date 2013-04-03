@@ -6,46 +6,43 @@
             [ignite-demo.views.route :as r]
             [ignite-demo.views.index :as index]
             [ignite-demo.views.stop :as s]
-            [ignite-demo.models.stop :as stop]))
+            [ignite-demo.models.stop :as stop]
+            [ignite-demo.models.route :as rt]
+            [ring.util.response :as response]
+            [ring.middleware.gzip :as gzip]))
 
-(defn with-gzip [handler]
-  "Helper to gzip data if the client accepts it"
-  (fn [request]
-    (let [response (handler request)
-          out (java.io.ByteArrayOutputStream.)
-          accept-encoding (.get (:headers request) "accept-encoding")]
-
-      (if (and (not (instance? java.io.File (:body response)))
-               (not (nil? accept-encoding))
-               (re-find #"gzip" accept-encoding))
-        (do
-          (doto (java.io.BufferedOutputStream.
-                 (java.util.zip.GZIPOutputStream. out))
-            (.write (.getBytes (:body response)))
-            (.close))
-
-          {:status (:status response)
-           :headers (assoc (:headers response)
-                      "Content-Type" "text/html"
-                      "Content-Encoding" "gzip")
-           :body (java.io.ByteArrayInputStream. (.toByteArray out))})
-        response))))
+(defn with-time
+  "Helper function to print the time it takes to handle a request to the server logs"
+  [display-fn]
+  (fn [& args]
+    (time (apply display-fn args))))
 
 (def display-index (memoize index/display))
 (def display-stop (memoize s/display))
+(def display-route (memoize r/display))
 
 (defroutes app-routes
-  (GET "/" [] (display-index))
-  (GET "/route/:id" [id] (r/display id))
-  (GET "/stop/:id" [id] (display-stop id))
+  "The various routes for the app."
+  (GET "/" [] ((with-time display-index)))
+  (GET "/route/:id" [id] ((with-time display-route) id))
+  (GET "/stop/:id" [id] ((with-time display-stop) id))
   (route/resources "/")
   (route/not-found "Not found."))
 
 (def app
-  (handler/site (with-gzip app-routes)))
+  (-> (handler/site app-routes)
+      (gzip/wrap-gzip)))
 
 (defn memoize-all
   "Memoizes all pages for stops and routes to improve performance."
   []
+  (println "Starting memoization...")
+  (print "index:")
+  (time (dorun (display-index)))
+  (println "routes:")
+  (time (dorun (pmap #(display-route (:id %)) (rt/all))))
+  (println "stops:")
   (time (dorun (pmap #(display-stop (:id %)) stop/all-stops))))
+
 (memoize-all)
+

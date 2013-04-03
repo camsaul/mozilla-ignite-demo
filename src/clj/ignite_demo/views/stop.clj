@@ -53,10 +53,8 @@
   "Displays the arrival time table for a route."
   [[route-id times]]
   (let [pairs (map (fn [[_ hour diff]]
-                     (let [late-str (if (< diff 0) "late" "early")
-                           [mins-late secs-late] (map #(biginteger (math/abs(% diff 60))) [quot rem])]
-                       [(format "%s: %d:%02d %s" (util/format-time hour) mins-late secs-late late-str)
-                        (math/abs diff)]))
+                     [(format "%s: %s" (util/format-time hour) (util/format-late-early-string diff))
+                      (math/abs diff)])
                    times)]
     [:div.arrivals-chart {:route route-id}
      (graph/display-vertical-bar-graph (str "Route " route-id " Average Arrival Times") pairs 780 20)]))
@@ -79,7 +77,8 @@
               `[~route ~@(mapv (fn [[hour hour-maps]]
                                  (let [avg-pcount (float (/ (reduce + (map :est_load hour-maps))
                                                             (count hour-maps)))]
-                                   [(util/format-time hour) avg-pcount]))
+                                   [(format "%s - %.1f passengers" (util/format-time hour) avg-pcount)
+                                    avg-pcount]))
                                all-hour-maps)]))
           all-maps)))
 

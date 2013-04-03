@@ -1,6 +1,7 @@
 (ns ignite-demo.models.utility
   (:require [clojure-csv.core :as csv]
-            [clojure.java.io :as io]))
+            [clojure.java.io :as io]
+            [clojure.math.numeric-tower :as math]))
 
 (defn distance-between-coordinates
   "Returns the distance in meters between two locations specified by their lats and lons."
@@ -52,3 +53,10 @@ Returns nil. Additional bindings (evaluated after each line is bound) may also b
            (= 12 hour) (format "12:%02dPM" minute)
            (> hour 12) (format "%d:%02dPM" (- hour 12) minute)
            :else (format "%d:%02dAM" hour minute))))
+
+(defn format-late-early-string
+  "Takes a diff amount in seconds and returns a string like '0:06 early' or '1:12 late'"
+  [seconds-diff]
+  (let [late-str (if (< seconds-diff 0) "late" "early")
+        [mins-late secs-late] (map #(biginteger (math/abs(% seconds-diff 60))) [quot rem])]
+    (format "%d:%02d %s"  mins-late secs-late late-str)))

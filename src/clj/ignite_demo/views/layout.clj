@@ -13,20 +13,15 @@
     [:meta {:charset "utf-8"}]
     [:meta {:name "viewport" :content "width=device-width, initial-scale=1.0"}]
     [:title title]
-    (include-css "/css/bootstrap.css"
-                 "/css/flat-ui.css"
+    (include-css "/css/bootstrap.min.css"
+                 "/css/flat-ui.min.css"
                  "/css/application.css")]
    [:body
     (apply conj [:div {:class "container"} (header)] body)
     (footer)
-    (include-js "/js/jquery-1.8.2.min.js"
-                "/js/jquery-ui-1.10.0.custom.min.js"
-                "/js/jquery.dropkick-1.0.0.js"
-                "/js/custom_checkbox_and_radio.js"
-                "/js/custom_radio.js"
-                "/js/jquery.tagsinput.js"
-                "/js/bootstrap-tooltip.js"
-                "/js/jquery.placeholder.js"
+    ;; JS is placed at the end so the pages load faster
+    (include-js "//ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"
+                "/js/bootstrap-tooltip.min.js"
                 "/js/application.js")]))
 
 (defn header
