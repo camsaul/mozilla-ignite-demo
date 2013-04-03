@@ -39,3 +39,16 @@ Returns nil. Additional bindings (evaluated after each line is bound) may also b
                 (let [~@other-bindings]
                   ~@body))
               parsed-lines#)))))
+
+(defn format-time
+  "Takes an hour (0-23) and an optional minute and returns a pretty string such as 8PM or 8:30PM"
+  ([hour]
+     (cond (zero? hour) "12AM"
+           (= 12 hour) "12PM"
+           (> hour 12) (str (- hour 12) "PM")
+           :else (str hour "AM")))
+  ([hour minute]
+     (cond (zero? hour) (format "12:%02dAM" minute)
+           (= 12 hour) (format "12:%02dPM" minute)
+           (> hour 12) (format "%d:%02dPM" (- hour 12) minute)
+           :else (format "%d:%02dAM" hour minute))))

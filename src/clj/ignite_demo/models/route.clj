@@ -2,7 +2,8 @@
   "Helper methods for getting and dealing with routes."
   (:use korma.db
         korma.core)
-  (:require [ignite-demo.models.db :as db]
+  (:require [clojure.java.jdbc :as sql]
+            [ignite-demo.models.db :as db]
             [ignite-demo.models.utility :as util]
             [ignite-demo.models.direction :as dir]))
 
@@ -42,13 +43,39 @@
 ;;; 7xx = xx express route
 ;;; 8xx = xx bx express route
 ;;; 9xx = xx ax express route
-(defn regular-route-tag-for-passenger-count-route-tag
-  "The passenger count CSV data provided by the SFMATA uses different route numbers than what the routes are actually called. This function translates the names used in passenger-count to what we use everywhere else."
-  [route-tag]
-  (let [route-tag-as-int (try (Integer/parseInt route-tag) (catch NumberFormatException e))]
+(defn route-tag-for-pcount-route-tag
+  "The passenger count CSV data provided by the SFMATA uses different route numbers than what the routes are actu   ally called. This function translates the names used in passenger-count to what we use everywhere else."
+  [pc-route-tag]
+  (let [route-tag-as-int (try (Integer/parseInt pc-route-tag) (catch NumberFormatException e))]
     (if (or (nil? route-tag-as-int) (< route-tag-as-int 500))
-      route-tag
+      pc-route-tag
       (let [suffixes {5 "L", 6 " OWL", 7 "X", 8 "BX", 9 "AX" }
             hundreds (quot route-tag-as-int 100)
             prefix (rem route-tag-as-int 100)]
         (str prefix (suffixes hundreds))))))
+
+(defn pcount-route-tag
+  "The passenger count CSV provided by the SFMATA uses different route numbers than we use elsewhere. Converts a
+   standard route tag to the special route tag used in the pcount CSV data."
+  [route-tag]
+  (let [prefixes {"L" 5, " OWL" 6, "X" 7, "BX" 8, "AX" 9}
+        regexes (map #(re-pattern (str "([0-9]+)" %)) (keys prefixes))
+        clauses (flatten (map (fn [regex prefix]
+                                (let [result (re-find regex route-tag)]
+                                  [(not (nil? result))
+                                   (format "%d%02d" prefix
+                                           (try (Integer/parseInt (last result)) (catch Exception e)))]))
+                              regexes (vals prefixes)))]
+    (eval `(cond ~@clauses :else ~route-tag))))
+
+(defn passenger-counts-for-route
+  "Returns a vector of [stop-id avg-pcount] vectors."
+  [route-tag]
+  (db/with-conn
+    (sql/with-query-results results
+      [(str "select stop_id, est_load "
+            "from passenger_count "
+            "where route_id = '" (pcount-route-tag route-tag) "';")]
+      (mapv (fn [[stop-id s-map]]
+              [stop-id (float (/ (apply + (map :est_load s-map)) (count s-map)))])
+            (group-by :stop_id results)))))

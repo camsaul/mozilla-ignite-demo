@@ -8,5 +8,5 @@
   [direction-tag]
   (select db/direction_stop
           (where {:direction_id direction-tag})
-          (fields) ; don't return any of the direction_stop fields
+          (fields)     ; don't return any of the direction_stop fields
           (with db/stop)))

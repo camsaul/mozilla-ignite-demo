@@ -41,20 +41,23 @@
   [stop-tag]
   (db/with-conn
     (sql/with-query-results results
-      [(str "select sa.route_id, sa.arrival_time, "
-            "cast (extract(seconds from (sa.arrival_time - ra.arrival_time)) as integer) as diff "
-            "from scheduled_arrival as sa "
-            "left join realtime_arrival as ra "
-            "on sa.block_id = ra.block_id "
-            "and sa.route_id = ra.route_id "
-            "and sa.trip_id = ra.trip_id "
-            "and sa.stop_id = ra.stop_id "
+      [(str "select sa.route_id, "
+            "cast (extract(hour from sa.arrival_time) as integer) as hour, "
+            "cast (extract(seconds from (sa.arrival_time - ra.arrival_time)) as integer) as diff  "
+            "from scheduled_arrival as sa  "
+            "left join realtime_arrival as ra  "
+            "on sa.block_id = ra.block_id  "
+            "and sa.route_id = ra.route_id  "
+            "and sa.trip_id = ra.trip_id  "
+            "and sa.stop_id = ra.stop_id  "
             "where sa.stop_id = '" stop-tag "' "
-            "and sa.arrival_time is not null "
-            "and ra.arrival_time is not null "
-            "and extract(day from sa.arrival_time) = extract(day from ra.arrival_time) "
-            "order by route_id, arrival_time asc;")]
-      (doall results))))
+            "and sa.arrival_time is not null  "
+            "and ra.arrival_time is not null  "
+            "and extract(day from sa.arrival_time) = extract(day from ra.arrival_time)  "
+            "order by route_id, hour asc; ")]
+      (map (fn [[[route-id hour] maps]]
+             [route-id hour (float (/ (apply + (map :diff maps)) (count maps)))])
+           (group-by (fn [{:keys [hour route_id]}] [route_id hour]) results)))))
 
 (defn passenger-counts-for-stop
   "Returns a seq of maps of passenger counts for a given stop. Keys aer :route_id, :est_load, :time_stop, and :hour"

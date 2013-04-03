@@ -23814,24 +23814,40 @@ goog.require("jayq.util");
 goog.require("jayq.core");
 goog.require("jayq.util");
 goog.require("jayq.core");
+ignite_demo.core.hide_if_not_route_id = function hide_if_not_route_id(element, route_id) {
+  if(cljs.core.not_EQ_.call(null, jayq.core.attr.call(null, jayq.core.$.call(null, element), "\ufdd0:route"), route_id)) {
+    return jayq.core.hide.call(null, element)
+  }else {
+    return jayq.core.show.call(null, element)
+  }
+};
 jayq.core.document_ready.call(null, function() {
   jayq.core.bind.call(null, jayq.core.$.call(null, "\ufdd0:li.todo"), "\ufdd0:click", function() {
     return jayq.core.toggle_class.call(null, jayq.core.$.call(null, "\ufdd0:this"), "\ufdd0:todo-done")
   });
   jayq.core.$.call(null, "[data-toggle=tooltip]").tooltip();
   var route_buttons = jayq.core.$.call(null, "div#passenger-count button.btn");
-  var route_tables = jayq.core.$.call(null, "\ufdd0:div.route-table");
-  cljs.core.mapv.call(null, jayq.core.hide, cljs.core.rest.call(null, route_tables));
-  return cljs.core.mapv.call(null, function(button) {
-    var route_id = jayq.core.attr.call(null, button, "\ufdd0:route");
-    return jayq.core.bind.call(null, button, "\ufdd0:click", function() {
-      return cljs.core.mapv.call(null, function(route_table) {
-        if(cljs.core._EQ_.call(null, jayq.core.attr.call(null, route_table, "\ufdd0:route"), route_id)) {
-          return jayq.core.show.call(null, route_table)
-        }else {
-          return jayq.core.hide.call(null, route_table)
+  var p_charts = jayq.core.$.call(null, "\ufdd0:div.route-table");
+  var a_charts = jayq.core.$.call(null, "\ufdd0:div.arrivals-chart");
+  var default_route_id = jayq.core.attr.call(null, jayq.core.$.call(null, cljs.core.first.call(null, route_buttons)), "\ufdd0:route");
+  var hide_all_not_id = function(route_buttons, p_charts, a_charts, default_route_id) {
+    return function(id) {
+      return cljs.core.mapv.call(null, function(route_buttons, p_charts, a_charts, default_route_id) {
+        return function(charts) {
+          return cljs.core.mapv.call(null, function(route_buttons, p_charts, a_charts, default_route_id) {
+            return function(p1__14091_SHARP_) {
+              return ignite_demo.core.hide_if_not_route_id.call(null, p1__14091_SHARP_, id)
+            }
+          }(route_buttons, p_charts, a_charts, default_route_id), charts)
         }
-      }, route_tables)
+      }(route_buttons, p_charts, a_charts, default_route_id), cljs.core.PersistentVector.fromArray([p_charts, a_charts], true))
+    }
+  }(route_buttons, p_charts, a_charts, default_route_id);
+  hide_all_not_id.call(null, default_route_id);
+  return cljs.core.mapv.call(null, function(button) {
+    var route_id = jayq.core.attr.call(null, jayq.core.$.call(null, button), "\ufdd0:route");
+    return jayq.core.bind.call(null, button, "\ufdd0:click", function() {
+      return hide_all_not_id.call(null, route_id)
     })
   }, route_buttons)
 });

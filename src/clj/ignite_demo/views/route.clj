@@ -7,9 +7,10 @@
         ignite-demo.views.map-images)
   (:require [ignite-demo.models.route :as r]
             [ignite-demo.models.direction :as d]
-            [ignite-demo.views.layout :as layout]))
+            [ignite-demo.views.layout :as layout]
+            [ignite-demo.views.graph :as graph]))
 
-(declare display-direction)
+(declare display-direction display-pcount-graph)
 
 (defn display
   "Creates the HTML for a given route-tag."
@@ -20,27 +21,39 @@
     (layout/page title
      [:h1 title]
      [:div
-      (map display-direction directions)])))
+      (map (partial display-direction route-tag) directions)])))
 
 (defn display-direction
   "Helper method that displays a list of stops for a given direction."
-  [direction]
-  (let [{:keys [name title id]} direction
-        stops (d/stops-for-direction id)
-        map-size 460]
-    [:div {:style "padding: 10px;"}
+  [route-tag {:keys [name title id]}]
+  (let [stops (d/stops-for-direction id)
+        pcount-graph (display-pcount-graph route-tag stops)
+        stops-list [:ul {:style "margin: 10px;"}
+                    (map (fn [{:keys [id lat lon title]}]
+                           (vector :li [:a {:href (str "/stop/" id) :data-toggle "tooltip"
+                                            :data-placement "right"
+                                            :data-html "true"
+                                            :data-original-title (html (map-image-for-stop lat lon 175 15))}
+                                        title]))
+                         stops)]]
+    [:div.row {:style "padding: 10px;"}
      [:h3 title]
-     [:div {:class "row"}
-      [:div {:class "span4"}
-       [:ul
-        [:ul
-         (map (fn [stop]
-                (vector :li [:a {:href (str "/stop/" (:id stop)) :data-toggle "tooltip"
-                                 :data-placement "right"
-                                 :data-html "true"
-                                 :data-original-title (html (map-image-for-stop
-                                                             (:lat stop) (:lon stop) 175 15))}
-                             (:title stop)]))
-              stops)]]]
-      [:div {:class "span6"}
-       (map-image-for-stops map-size stops)]]]))
+     [:div.span4
+      (map-image-for-stops 300 stops)
+      (if pcount-graph stops-list)]
+     pcount-graph
+     (if (not pcount-graph) [:div.span4 stops-list])]))
+
+(defn display-pcount-graph
+  "Helper method to display a graph of passenger counts for a direction."
+  [route-tag stops]
+  (let [pcounts (flatten (r/passenger-counts-for-route route-tag))]
+    (if (empty? pcounts)
+      nil
+      (let [pcounts (apply assoc {} pcounts)
+            pairs (filterv #(not (nil? (last %)))
+                           (map (fn [{:keys [id title]}]
+                                  (let [pcount (pcounts id)]
+                                    [(format "%s: %.1f" title pcount) pcount]))
+                                stops))]
+        [:div.span6 (graph/display-vertical-bar-graph "Average Passenger Counts Per Stop" pairs  460 20)]))))
