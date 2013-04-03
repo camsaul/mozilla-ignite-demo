@@ -4,9 +4,9 @@ A web application written in Clojure and ClojureScript to help the SFMTA determi
 
 ## Live Demo
 
-A live demo is intermittently avaiable on the [LuckyBird test server][1].
+A live demo is available at [http://luckybird-ignite-demo.herokuapp.com][1].
 
-[1]: http://birdapi.net
+[1]: http://luckybird-ignite-demo.herokuapp.com
 
 ## Prerequisites
 

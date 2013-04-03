@@ -8,7 +8,6 @@
             [ignite-demo.views.stop :as s]
             [ignite-demo.models.stop :as stop]
             [ignite-demo.models.route :as rt]
-            [ring.util.response :as response]
             [ring.middleware.gzip :as gzip]))
 
 (defn with-time
