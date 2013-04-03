@@ -48,5 +48,4 @@
   "Memoizes all pages for stops and routes to improve performance."
   []
   (time (dorun (pmap #(display-stop (:id %)) stop/all-stops))))
-
-(defonce memoized (memoize-all))
+(memoize-all)
