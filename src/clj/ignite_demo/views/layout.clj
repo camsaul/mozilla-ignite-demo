@@ -32,7 +32,7 @@
     [:div.navbar
      [:div.navbar-inner
       [:div.container
-       [:div.nav-collapse collapse
+       [:div.nav-collapse.collapse
         [:ul {:class "nav"}
          [:li [:a {:href "/"} "Select Route"]
           [:ul
