@@ -15,7 +15,7 @@
   :plugins [[lein-ring "0.8.2"]
             [codox "0.6.4"]
             [lein-cljsbuild "0.3.0"]]
-  :jvm-opts ["-server" "-Xmx1024m"]
+  :jvm-opts ["-Xmx1024m"]
   :source-paths ["src/clj" "src/cljs"]
   :cljsbuild {:builds [{:source-paths ["src/cljs"]
                         :compiler {:output-to "resources/public/js/application.js"
@@ -28,5 +28,4 @@
   :ring {:handler ignite-demo.handler/app}
   :profiles
   {:dev {:dependencies [[ring-mock "0.1.3"]]}}
-  :min-lein-version "2.0.0"
-  :warn-on-reflection true)
+  :min-lein-version "2.0.0")
